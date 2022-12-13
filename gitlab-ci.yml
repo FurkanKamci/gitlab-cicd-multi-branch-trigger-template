@@ -1,0 +1,29 @@
+stages:
+  - triggers
+
+trigger_dev:
+  stage: triggers
+  trigger:
+    include: /gitlabconf/devcicd/.gitlab-ci.yml
+  rules:
+    # Triggered only when push, commit or merge request event come
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"
+      when: always
+
+trigger_preprod:
+  stage: triggers
+  trigger:
+    include: /gitlabconf/preprodcicd/.gitlab-ci.yml
+  rules:
+    # Manually triggered only when join request event come
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "preprod"
+      when: manual
+
+trigger_prod:
+  stage: triggers
+  trigger:
+    include: /gitlabconf/prodcicd/.gitlab-ci.yml
+  rules:
+    # Manually triggered only when join request event come
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "preprod"
+      when: manual
