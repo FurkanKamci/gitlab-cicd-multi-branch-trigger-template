@@ -1,0 +1,103 @@
+stages:
+  - build
+  - deploy
+#---------------------------------------#
+
+#------------Build Template-------------#
+.build: &build
+  stage: build
+  # Build aşaması
+  image: 
+  script:
+
+ 
+
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - 
+ 
+#------------Deploy Template--------------#
+.deploy: &deploy
+  stage: deploy
+  image: 
+  script:
+    - 
+#----------------------------------#
+ 
+#----------Dev Branch--------------#
+BuildToDev:
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"
+  except:
+    - preprod
+    - prod
+  variables:
+    APP_NAME: dev
+  <<: *build
+#--
+DeployToDev:
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"
+  except:
+    - preprod
+    - prod
+  variables:
+    APP_NAME: dev
+  needs: [BuildToDev]
+  <<: *deploy
+#--------------------------------------#
+
+#----------Preprod Branch--------------#
+BuildToPreprod:
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == "preprod" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "preprod"
+  when: manual
+  except:
+    - main
+    - prod
+  variables:
+    APP_NAME: preprod
+  <<: *build
+#--
+DeployToPreprod:
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == "preprod" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "preprod"
+  except:
+    - main
+    - prod
+  variables:
+    APP_NAME: preprod
+  needs: [BuildToPreprod]
+  <<: *deploy
+#--------------------------------------#
+ 
+#----------Prod Branch-----------------#
+BuildToProd:
+  only:
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "prod"
+  when: manual
+  except:
+    - main
+    - preprod
+  variables:
+    APP_NAME: prod
+  <<: *build
+#--
+DeployToProd:
+  only:
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "prod"
+  except:
+    - main
+    - preprod
+  variables:
+    APP_NAME: prod
+  needs: [BuildToProd]
+  <<: *deploy
+#--------------------------------------#
